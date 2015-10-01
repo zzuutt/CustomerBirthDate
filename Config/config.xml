@@ -16,35 +16,17 @@
         -->
     </forms>
 
-    <commands>
-        <!--
-        <command class="CustomerBirthDate\Command\MySuperCommand" />
-        -->
-    </commands>
-
-    <!--
     <services>
-
+        <service id="customerbirthdate.services" class="CustomerBirthDate\EventListeners\CustomerBirthDateEventListener" scope="request">
+            <argument id="request" type="service"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
     </services>
-    -->
 
-    <!--
     <hooks>
-        <hook id="customerbirthdate.hook" class="CustomerBirthDate\Hook\MySuperHook" scope="request">
-            <tag name="hook.event_listener" event="main.body.bottom" type="front|back|pdf|email" method="onMainBodyBottom" />
+        <hook id="customerbirthdate.hook" class="CustomerBirthDate\Hook\CustomerBirthDateHook" scope="request">
+            <tag name="hook.event_listener" event="register.form-bottom" type="front" method="onRegister" />
+            <tag name="hook.event_listener" event="register.after-javascript-include" type="front" method="onRegisterAddJs" />
         </hook>
     </hooks>
-    -->
-
-    <!--
-    <exports>
-
-    </exports>
-    -->
-
-    <!--
-    <imports>
-
-    </imports>
-    -->
 </config>
