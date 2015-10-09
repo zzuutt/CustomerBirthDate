@@ -3,6 +3,7 @@
 namespace CustomerBirthDate\Model\Base;
 
 use \Exception;
+use \PDO;
 use CustomerBirthDate\Model\CustomerBirthDate as ChildCustomerBirthDate;
 use CustomerBirthDate\Model\CustomerBirthDateQuery as ChildCustomerBirthDateQuery;
 use CustomerBirthDate\Model\Map\CustomerBirthDateTableMap;
@@ -21,10 +22,10 @@ use Thelia\Model\Customer;
  *
  *
  *
- * @method     ChildCustomerBirthDateQuery orderByCustomerId($order = Criteria::ASC) Order by the customer_id column
+ * @method     ChildCustomerBirthDateQuery orderById($order = Criteria::ASC) Order by the id column
  * @method     ChildCustomerBirthDateQuery orderByBirthDate($order = Criteria::ASC) Order by the birth_date column
  *
- * @method     ChildCustomerBirthDateQuery groupByCustomerId() Group by the customer_id column
+ * @method     ChildCustomerBirthDateQuery groupById() Group by the id column
  * @method     ChildCustomerBirthDateQuery groupByBirthDate() Group by the birth_date column
  *
  * @method     ChildCustomerBirthDateQuery leftJoin($relation) Adds a LEFT JOIN clause to the query
@@ -38,10 +39,10 @@ use Thelia\Model\Customer;
  * @method     ChildCustomerBirthDate findOne(ConnectionInterface $con = null) Return the first ChildCustomerBirthDate matching the query
  * @method     ChildCustomerBirthDate findOneOrCreate(ConnectionInterface $con = null) Return the first ChildCustomerBirthDate matching the query, or a new ChildCustomerBirthDate object populated from the query conditions when no match is found
  *
- * @method     ChildCustomerBirthDate findOneByCustomerId(int $customer_id) Return the first ChildCustomerBirthDate filtered by the customer_id column
+ * @method     ChildCustomerBirthDate findOneById(int $id) Return the first ChildCustomerBirthDate filtered by the id column
  * @method     ChildCustomerBirthDate findOneByBirthDate(string $birth_date) Return the first ChildCustomerBirthDate filtered by the birth_date column
  *
- * @method     array findByCustomerId(int $customer_id) Return ChildCustomerBirthDate objects filtered by the customer_id column
+ * @method     array findById(int $id) Return ChildCustomerBirthDate objects filtered by the id column
  * @method     array findByBirthDate(string $birth_date) Return ChildCustomerBirthDate objects filtered by the birth_date column
  *
  */
@@ -100,13 +101,80 @@ abstract class CustomerBirthDateQuery extends ModelCriteria
      */
     public function findPk($key, $con = null)
     {
-        throw new \LogicException('The ChildCustomerBirthDate class has no primary key');
+        if ($key === null) {
+            return null;
+        }
+        if ((null !== ($obj = CustomerBirthDateTableMap::getInstanceFromPool((string) $key))) && !$this->formatter) {
+            // the object is already in the instance pool
+            return $obj;
+        }
+        if ($con === null) {
+            $con = Propel::getServiceContainer()->getReadConnection(CustomerBirthDateTableMap::DATABASE_NAME);
+        }
+        $this->basePreSelect($con);
+        if ($this->formatter || $this->modelAlias || $this->with || $this->select
+         || $this->selectColumns || $this->asColumns || $this->selectModifiers
+         || $this->map || $this->having || $this->joins) {
+            return $this->findPkComplex($key, $con);
+        } else {
+            return $this->findPkSimple($key, $con);
+        }
+    }
+
+    /**
+     * Find object by primary key using raw SQL to go fast.
+     * Bypass doSelect() and the object formatter by using generated code.
+     *
+     * @param     mixed $key Primary key to use for the query
+     * @param     ConnectionInterface $con A connection object
+     *
+     * @return   ChildCustomerBirthDate A model object, or null if the key is not found
+     */
+    protected function findPkSimple($key, $con)
+    {
+        $sql = 'SELECT ID, BIRTH_DATE FROM customer_birth_date WHERE ID = :p0';
+        try {
+            $stmt = $con->prepare($sql);
+            $stmt->bindValue(':p0', $key, PDO::PARAM_INT);
+            $stmt->execute();
+        } catch (Exception $e) {
+            Propel::log($e->getMessage(), Propel::LOG_ERR);
+            throw new PropelException(sprintf('Unable to execute SELECT statement [%s]', $sql), 0, $e);
+        }
+        $obj = null;
+        if ($row = $stmt->fetch(\PDO::FETCH_NUM)) {
+            $obj = new ChildCustomerBirthDate();
+            $obj->hydrate($row);
+            CustomerBirthDateTableMap::addInstanceToPool($obj, (string) $key);
+        }
+        $stmt->closeCursor();
+
+        return $obj;
+    }
+
+    /**
+     * Find object by primary key.
+     *
+     * @param     mixed $key Primary key to use for the query
+     * @param     ConnectionInterface $con A connection object
+     *
+     * @return ChildCustomerBirthDate|array|mixed the result, formatted by the current formatter
+     */
+    protected function findPkComplex($key, $con)
+    {
+        // As the query uses a PK condition, no limit(1) is necessary.
+        $criteria = $this->isKeepQuery() ? clone $this : $this;
+        $dataFetcher = $criteria
+            ->filterByPrimaryKey($key)
+            ->doSelect($con);
+
+        return $criteria->getFormatter()->init($criteria)->formatOne($dataFetcher);
     }
 
     /**
      * Find objects by primary key
      * <code>
-     * $objs = $c->findPks(array(array(12, 56), array(832, 123), array(123, 456)), $con);
+     * $objs = $c->findPks(array(12, 56, 832), $con);
      * </code>
      * @param     array $keys Primary keys to use for the query
      * @param     ConnectionInterface $con an optional connection object
@@ -115,7 +183,16 @@ abstract class CustomerBirthDateQuery extends ModelCriteria
      */
     public function findPks($keys, $con = null)
     {
-        throw new \LogicException('The ChildCustomerBirthDate class has no primary key');
+        if (null === $con) {
+            $con = Propel::getServiceContainer()->getReadConnection($this->getDbName());
+        }
+        $this->basePreSelect($con);
+        $criteria = $this->isKeepQuery() ? clone $this : $this;
+        $dataFetcher = $criteria
+            ->filterByPrimaryKeys($keys)
+            ->doSelect($con);
+
+        return $criteria->getFormatter()->init($criteria)->format($dataFetcher);
     }
 
     /**
@@ -127,7 +204,8 @@ abstract class CustomerBirthDateQuery extends ModelCriteria
      */
     public function filterByPrimaryKey($key)
     {
-        throw new \LogicException('The ChildCustomerBirthDate class has no primary key');
+
+        return $this->addUsingAlias(CustomerBirthDateTableMap::ID, $key, Criteria::EQUAL);
     }
 
     /**
@@ -139,22 +217,23 @@ abstract class CustomerBirthDateQuery extends ModelCriteria
      */
     public function filterByPrimaryKeys($keys)
     {
-        throw new \LogicException('The ChildCustomerBirthDate class has no primary key');
+
+        return $this->addUsingAlias(CustomerBirthDateTableMap::ID, $keys, Criteria::IN);
     }
 
     /**
-     * Filter the query on the customer_id column
+     * Filter the query on the id column
      *
      * Example usage:
      * <code>
-     * $query->filterByCustomerId(1234); // WHERE customer_id = 1234
-     * $query->filterByCustomerId(array(12, 34)); // WHERE customer_id IN (12, 34)
-     * $query->filterByCustomerId(array('min' => 12)); // WHERE customer_id > 12
+     * $query->filterById(1234); // WHERE id = 1234
+     * $query->filterById(array(12, 34)); // WHERE id IN (12, 34)
+     * $query->filterById(array('min' => 12)); // WHERE id > 12
      * </code>
      *
      * @see       filterByCustomer()
      *
-     * @param     mixed $customerId The value to use as filter.
+     * @param     mixed $id The value to use as filter.
      *              Use scalar values for equality.
      *              Use array values for in_array() equivalent.
      *              Use associative array('min' => $minValue, 'max' => $maxValue) for intervals.
@@ -162,16 +241,16 @@ abstract class CustomerBirthDateQuery extends ModelCriteria
      *
      * @return ChildCustomerBirthDateQuery The current query, for fluid interface
      */
-    public function filterByCustomerId($customerId = null, $comparison = null)
+    public function filterById($id = null, $comparison = null)
     {
-        if (is_array($customerId)) {
+        if (is_array($id)) {
             $useMinMax = false;
-            if (isset($customerId['min'])) {
-                $this->addUsingAlias(CustomerBirthDateTableMap::CUSTOMER_ID, $customerId['min'], Criteria::GREATER_EQUAL);
+            if (isset($id['min'])) {
+                $this->addUsingAlias(CustomerBirthDateTableMap::ID, $id['min'], Criteria::GREATER_EQUAL);
                 $useMinMax = true;
             }
-            if (isset($customerId['max'])) {
-                $this->addUsingAlias(CustomerBirthDateTableMap::CUSTOMER_ID, $customerId['max'], Criteria::LESS_EQUAL);
+            if (isset($id['max'])) {
+                $this->addUsingAlias(CustomerBirthDateTableMap::ID, $id['max'], Criteria::LESS_EQUAL);
                 $useMinMax = true;
             }
             if ($useMinMax) {
@@ -182,7 +261,7 @@ abstract class CustomerBirthDateQuery extends ModelCriteria
             }
         }
 
-        return $this->addUsingAlias(CustomerBirthDateTableMap::CUSTOMER_ID, $customerId, $comparison);
+        return $this->addUsingAlias(CustomerBirthDateTableMap::ID, $id, $comparison);
     }
 
     /**
@@ -240,14 +319,14 @@ abstract class CustomerBirthDateQuery extends ModelCriteria
     {
         if ($customer instanceof \Thelia\Model\Customer) {
             return $this
-                ->addUsingAlias(CustomerBirthDateTableMap::CUSTOMER_ID, $customer->getId(), $comparison);
+                ->addUsingAlias(CustomerBirthDateTableMap::ID, $customer->getId(), $comparison);
         } elseif ($customer instanceof ObjectCollection) {
             if (null === $comparison) {
                 $comparison = Criteria::IN;
             }
 
             return $this
-                ->addUsingAlias(CustomerBirthDateTableMap::CUSTOMER_ID, $customer->toKeyValue('PrimaryKey', 'Id'), $comparison);
+                ->addUsingAlias(CustomerBirthDateTableMap::ID, $customer->toKeyValue('PrimaryKey', 'Id'), $comparison);
         } else {
             throw new PropelException('filterByCustomer() only accepts arguments of type \Thelia\Model\Customer or Collection');
         }
@@ -313,8 +392,7 @@ abstract class CustomerBirthDateQuery extends ModelCriteria
     public function prune($customerBirthDate = null)
     {
         if ($customerBirthDate) {
-            throw new \LogicException('ChildCustomerBirthDate class has no primary key');
-
+            $this->addUsingAlias(CustomerBirthDateTableMap::ID, $customerBirthDate->getId(), Criteria::NOT_EQUAL);
         }
 
         return $this;

@@ -2,9 +2,9 @@
 <database defaultIdMethod="native" name="thelia" >
 
     <table name="customer_birth_date" namespace="CustomerBirthDate\Model">
-        <column name="customer_id" required="true" type="INTEGER" />
+        <column name="id" primaryKey="true"  required="true" type="INTEGER" />
         <foreign-key foreignTable="customer" name="fk_customer_id" onDelete="CASCADE" onUpdate="CASCADE">
-            <reference foreign="id" local="customer_id" />
+            <reference foreign="id" local="id" />
         </foreign-key>
         <column name="birth_date" required="true" type="DATE" />
     </table>

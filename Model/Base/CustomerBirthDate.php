@@ -56,10 +56,10 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
     protected $virtualColumns = array();
 
     /**
-     * The value for the customer_id field.
+     * The value for the id field.
      * @var        int
      */
-    protected $customer_id;
+    protected $id;
 
     /**
      * The value for the birth_date field.
@@ -339,14 +339,14 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
     }
 
     /**
-     * Get the [customer_id] column value.
+     * Get the [id] column value.
      *
      * @return   int
      */
-    public function getCustomerId()
+    public function getId()
     {
 
-        return $this->customer_id;
+        return $this->id;
     }
 
     /**
@@ -370,20 +370,20 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
     }
 
     /**
-     * Set the value of [customer_id] column.
+     * Set the value of [id] column.
      *
      * @param      int $v new value
      * @return   \CustomerBirthDate\Model\CustomerBirthDate The current object (for fluent API support)
      */
-    public function setCustomerId($v)
+    public function setId($v)
     {
         if ($v !== null) {
             $v = (int) $v;
         }
 
-        if ($this->customer_id !== $v) {
-            $this->customer_id = $v;
-            $this->modifiedColumns[CustomerBirthDateTableMap::CUSTOMER_ID] = true;
+        if ($this->id !== $v) {
+            $this->id = $v;
+            $this->modifiedColumns[CustomerBirthDateTableMap::ID] = true;
         }
 
         if ($this->aCustomer !== null && $this->aCustomer->getId() !== $v) {
@@ -392,7 +392,7 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
 
 
         return $this;
-    } // setCustomerId()
+    } // setId()
 
     /**
      * Sets the value of [birth_date] column to a normalized version of the date/time value specified.
@@ -452,8 +452,8 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
         try {
 
 
-            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : CustomerBirthDateTableMap::translateFieldName('CustomerId', TableMap::TYPE_PHPNAME, $indexType)];
-            $this->customer_id = (null !== $col) ? (int) $col : null;
+            $col = $row[TableMap::TYPE_NUM == $indexType ? 0 + $startcol : CustomerBirthDateTableMap::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
+            $this->id = (null !== $col) ? (int) $col : null;
 
             $col = $row[TableMap::TYPE_NUM == $indexType ? 1 + $startcol : CustomerBirthDateTableMap::translateFieldName('BirthDate', TableMap::TYPE_PHPNAME, $indexType)];
             if ($col === '0000-00-00') {
@@ -490,7 +490,7 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
      */
     public function ensureConsistency()
     {
-        if ($this->aCustomer !== null && $this->customer_id !== $this->aCustomer->getId()) {
+        if ($this->aCustomer !== null && $this->id !== $this->aCustomer->getId()) {
             $this->aCustomer = null;
         }
     } // ensureConsistency
@@ -689,8 +689,8 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
 
 
          // check the columns in natural order for more readable SQL queries
-        if ($this->isColumnModified(CustomerBirthDateTableMap::CUSTOMER_ID)) {
-            $modifiedColumns[':p' . $index++]  = 'CUSTOMER_ID';
+        if ($this->isColumnModified(CustomerBirthDateTableMap::ID)) {
+            $modifiedColumns[':p' . $index++]  = 'ID';
         }
         if ($this->isColumnModified(CustomerBirthDateTableMap::BIRTH_DATE)) {
             $modifiedColumns[':p' . $index++]  = 'BIRTH_DATE';
@@ -706,8 +706,8 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
             $stmt = $con->prepare($sql);
             foreach ($modifiedColumns as $identifier => $columnName) {
                 switch ($columnName) {
-                    case 'CUSTOMER_ID':
-                        $stmt->bindValue($identifier, $this->customer_id, PDO::PARAM_INT);
+                    case 'ID':
+                        $stmt->bindValue($identifier, $this->id, PDO::PARAM_INT);
                         break;
                     case 'BIRTH_DATE':
                         $stmt->bindValue($identifier, $this->birth_date ? $this->birth_date->format("Y-m-d H:i:s") : null, PDO::PARAM_STR);
@@ -768,7 +768,7 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                return $this->getCustomerId();
+                return $this->getId();
                 break;
             case 1:
                 return $this->getBirthDate();
@@ -802,7 +802,7 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
         $alreadyDumpedObjects['CustomerBirthDate'][$this->getPrimaryKey()] = true;
         $keys = CustomerBirthDateTableMap::getFieldNames($keyType);
         $result = array(
-            $keys[0] => $this->getCustomerId(),
+            $keys[0] => $this->getId(),
             $keys[1] => $this->getBirthDate(),
         );
         $virtualColumns = $this->virtualColumns;
@@ -849,7 +849,7 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
     {
         switch ($pos) {
             case 0:
-                $this->setCustomerId($value);
+                $this->setId($value);
                 break;
             case 1:
                 $this->setBirthDate($value);
@@ -878,7 +878,7 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
     {
         $keys = CustomerBirthDateTableMap::getFieldNames($keyType);
 
-        if (array_key_exists($keys[0], $arr)) $this->setCustomerId($arr[$keys[0]]);
+        if (array_key_exists($keys[0], $arr)) $this->setId($arr[$keys[0]]);
         if (array_key_exists($keys[1], $arr)) $this->setBirthDate($arr[$keys[1]]);
     }
 
@@ -891,7 +891,7 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
     {
         $criteria = new Criteria(CustomerBirthDateTableMap::DATABASE_NAME);
 
-        if ($this->isColumnModified(CustomerBirthDateTableMap::CUSTOMER_ID)) $criteria->add(CustomerBirthDateTableMap::CUSTOMER_ID, $this->customer_id);
+        if ($this->isColumnModified(CustomerBirthDateTableMap::ID)) $criteria->add(CustomerBirthDateTableMap::ID, $this->id);
         if ($this->isColumnModified(CustomerBirthDateTableMap::BIRTH_DATE)) $criteria->add(CustomerBirthDateTableMap::BIRTH_DATE, $this->birth_date);
 
         return $criteria;
@@ -908,32 +908,29 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
     public function buildPkeyCriteria()
     {
         $criteria = new Criteria(CustomerBirthDateTableMap::DATABASE_NAME);
+        $criteria->add(CustomerBirthDateTableMap::ID, $this->id);
 
         return $criteria;
     }
 
     /**
-     * Returns NULL since this table doesn't have a primary key.
-     * This method exists only for BC and is deprecated!
-     * @return null
+     * Returns the primary key for this object (row).
+     * @return   int
      */
     public function getPrimaryKey()
     {
-        return null;
+        return $this->getId();
     }
 
     /**
-     * Dummy primary key setter.
+     * Generic method to set the primary key (id column).
      *
-     * This function only exists to preserve backwards compatibility.  It is no longer
-     * needed or required by the Persistent interface.  It will be removed in next BC-breaking
-     * release of Propel.
-     *
-     * @deprecated
+     * @param       int $key Primary key.
+     * @return void
      */
-    public function setPrimaryKey($pk)
+    public function setPrimaryKey($key)
     {
-        // do nothing, because this object doesn't have any primary keys
+        $this->setId($key);
     }
 
     /**
@@ -943,7 +940,7 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
     public function isPrimaryKeyNull()
     {
 
-        return ;
+        return null === $this->getId();
     }
 
     /**
@@ -959,7 +956,7 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
      */
     public function copyInto($copyObj, $deepCopy = false, $makeNew = true)
     {
-        $copyObj->setCustomerId($this->getCustomerId());
+        $copyObj->setId($this->getId());
         $copyObj->setBirthDate($this->getBirthDate());
         if ($makeNew) {
             $copyObj->setNew(true);
@@ -998,17 +995,16 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
     public function setCustomer(ChildCustomer $v = null)
     {
         if ($v === null) {
-            $this->setCustomerId(NULL);
+            $this->setId(NULL);
         } else {
-            $this->setCustomerId($v->getId());
+            $this->setId($v->getId());
         }
 
         $this->aCustomer = $v;
 
-        // Add binding for other direction of this n:n relationship.
-        // If this object has already been added to the ChildCustomer object, it will not be re-added.
+        // Add binding for other direction of this 1:1 relationship.
         if ($v !== null) {
-            $v->addCustomerBirthDate($this);
+            $v->setCustomerBirthDate($this);
         }
 
 
@@ -1025,15 +1021,10 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
      */
     public function getCustomer(ConnectionInterface $con = null)
     {
-        if ($this->aCustomer === null && ($this->customer_id !== null)) {
-            $this->aCustomer = CustomerQuery::create()->findPk($this->customer_id, $con);
-            /* The following can be used additionally to
-                guarantee the related object contains a reference
-                to this object.  This level of coupling may, however, be
-                undesirable since it could result in an only partially populated collection
-                in the referenced object.
-                $this->aCustomer->addCustomerBirthDates($this);
-             */
+        if ($this->aCustomer === null && ($this->id !== null)) {
+            $this->aCustomer = CustomerQuery::create()->findPk($this->id, $con);
+            // Because this foreign key represents a one-to-one relationship, we will create a bi-directional association.
+            $this->aCustomer->setCustomerBirthDate($this);
         }
 
         return $this->aCustomer;
@@ -1044,7 +1035,7 @@ abstract class CustomerBirthDate implements ActiveRecordInterface
      */
     public function clear()
     {
-        $this->customer_id = null;
+        $this->id = null;
         $this->birth_date = null;
         $this->alreadyInSave = false;
         $this->clearAllReferences();

@@ -71,9 +71,9 @@ class CustomerBirthDateTableMap extends TableMap
     const NUM_HYDRATE_COLUMNS = 2;
 
     /**
-     * the column name for the CUSTOMER_ID field
+     * the column name for the ID field
      */
-    const CUSTOMER_ID = 'customer_birth_date.CUSTOMER_ID';
+    const ID = 'customer_birth_date.ID';
 
     /**
      * the column name for the BIRTH_DATE field
@@ -92,11 +92,11 @@ class CustomerBirthDateTableMap extends TableMap
      * e.g. self::$fieldNames[self::TYPE_PHPNAME][0] = 'Id'
      */
     protected static $fieldNames = array (
-        self::TYPE_PHPNAME       => array('CustomerId', 'BirthDate', ),
-        self::TYPE_STUDLYPHPNAME => array('customerId', 'birthDate', ),
-        self::TYPE_COLNAME       => array(CustomerBirthDateTableMap::CUSTOMER_ID, CustomerBirthDateTableMap::BIRTH_DATE, ),
-        self::TYPE_RAW_COLNAME   => array('CUSTOMER_ID', 'BIRTH_DATE', ),
-        self::TYPE_FIELDNAME     => array('customer_id', 'birth_date', ),
+        self::TYPE_PHPNAME       => array('Id', 'BirthDate', ),
+        self::TYPE_STUDLYPHPNAME => array('id', 'birthDate', ),
+        self::TYPE_COLNAME       => array(CustomerBirthDateTableMap::ID, CustomerBirthDateTableMap::BIRTH_DATE, ),
+        self::TYPE_RAW_COLNAME   => array('ID', 'BIRTH_DATE', ),
+        self::TYPE_FIELDNAME     => array('id', 'birth_date', ),
         self::TYPE_NUM           => array(0, 1, )
     );
 
@@ -107,11 +107,11 @@ class CustomerBirthDateTableMap extends TableMap
      * e.g. self::$fieldKeys[self::TYPE_PHPNAME]['Id'] = 0
      */
     protected static $fieldKeys = array (
-        self::TYPE_PHPNAME       => array('CustomerId' => 0, 'BirthDate' => 1, ),
-        self::TYPE_STUDLYPHPNAME => array('customerId' => 0, 'birthDate' => 1, ),
-        self::TYPE_COLNAME       => array(CustomerBirthDateTableMap::CUSTOMER_ID => 0, CustomerBirthDateTableMap::BIRTH_DATE => 1, ),
-        self::TYPE_RAW_COLNAME   => array('CUSTOMER_ID' => 0, 'BIRTH_DATE' => 1, ),
-        self::TYPE_FIELDNAME     => array('customer_id' => 0, 'birth_date' => 1, ),
+        self::TYPE_PHPNAME       => array('Id' => 0, 'BirthDate' => 1, ),
+        self::TYPE_STUDLYPHPNAME => array('id' => 0, 'birthDate' => 1, ),
+        self::TYPE_COLNAME       => array(CustomerBirthDateTableMap::ID => 0, CustomerBirthDateTableMap::BIRTH_DATE => 1, ),
+        self::TYPE_RAW_COLNAME   => array('ID' => 0, 'BIRTH_DATE' => 1, ),
+        self::TYPE_FIELDNAME     => array('id' => 0, 'birth_date' => 1, ),
         self::TYPE_NUM           => array(0, 1, )
     );
 
@@ -131,7 +131,7 @@ class CustomerBirthDateTableMap extends TableMap
         $this->setPackage('CustomerBirthDate.Model');
         $this->setUseIdGenerator(false);
         // columns
-        $this->addForeignKey('CUSTOMER_ID', 'CustomerId', 'INTEGER', 'customer', 'ID', true, null, null);
+        $this->addForeignPrimaryKey('ID', 'Id', 'INTEGER' , 'customer', 'ID', true, null, null);
         $this->addColumn('BIRTH_DATE', 'BirthDate', 'DATE', true, null, null);
     } // initialize()
 
@@ -140,7 +140,7 @@ class CustomerBirthDateTableMap extends TableMap
      */
     public function buildRelations()
     {
-        $this->addRelation('Customer', '\\Thelia\\Model\\Customer', RelationMap::MANY_TO_ONE, array('customer_id' => 'id', ), 'CASCADE', 'CASCADE');
+        $this->addRelation('Customer', '\\Thelia\\Model\\Customer', RelationMap::MANY_TO_ONE, array('id' => 'id', ), 'CASCADE', 'CASCADE');
     } // buildRelations()
 
     /**
@@ -156,7 +156,12 @@ class CustomerBirthDateTableMap extends TableMap
      */
     public static function getPrimaryKeyHashFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
-        return null;
+        // If the PK cannot be derived from the row, return NULL.
+        if ($row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)] === null) {
+            return null;
+        }
+
+        return (string) $row[TableMap::TYPE_NUM == $indexType ? 0 + $offset : static::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)];
     }
 
     /**
@@ -174,7 +179,11 @@ class CustomerBirthDateTableMap extends TableMap
     public static function getPrimaryKeyFromRow($row, $offset = 0, $indexType = TableMap::TYPE_NUM)
     {
 
-            return '';
+            return (int) $row[
+                            $indexType == TableMap::TYPE_NUM
+                            ? 0 + $offset
+                            : self::translateFieldName('Id', TableMap::TYPE_PHPNAME, $indexType)
+                        ];
     }
 
     /**
@@ -272,10 +281,10 @@ class CustomerBirthDateTableMap extends TableMap
     public static function addSelectColumns(Criteria $criteria, $alias = null)
     {
         if (null === $alias) {
-            $criteria->addSelectColumn(CustomerBirthDateTableMap::CUSTOMER_ID);
+            $criteria->addSelectColumn(CustomerBirthDateTableMap::ID);
             $criteria->addSelectColumn(CustomerBirthDateTableMap::BIRTH_DATE);
         } else {
-            $criteria->addSelectColumn($alias . '.CUSTOMER_ID');
+            $criteria->addSelectColumn($alias . '.ID');
             $criteria->addSelectColumn($alias . '.BIRTH_DATE');
         }
     }
@@ -324,19 +333,11 @@ class CustomerBirthDateTableMap extends TableMap
             // rename for clarity
             $criteria = $values;
         } elseif ($values instanceof \CustomerBirthDate\Model\CustomerBirthDate) { // it's a model object
-            // create criteria based on pk value
-            $criteria = $values->buildCriteria();
+            // create criteria based on pk values
+            $criteria = $values->buildPkeyCriteria();
         } else { // it's a primary key, or an array of pks
             $criteria = new Criteria(CustomerBirthDateTableMap::DATABASE_NAME);
-            // primary key is composite; we therefore, expect
-            // the primary key passed to be an array of pkey values
-            if (count($values) == count($values, COUNT_RECURSIVE)) {
-                // array is not multi-dimensional
-                $values = array($values);
-            }
-            foreach ($values as $value) {
-                $criteria->addOr($criterion);
-            }
+            $criteria->add(CustomerBirthDateTableMap::ID, (array) $values, Criteria::IN);
         }
 
         $query = CustomerBirthDateQuery::create()->mergeWith($criteria);

@@ -2,6 +2,9 @@
 
 namespace CustomerBirthDate\EventListeners;
 
+use CustomerBirthDate\Model\CustomerBirthDate;
+use CustomerBirthDate\Model\CustomerBirthDateQuery;
+use Symfony\Component\Config\Definition\Exception\Exception;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Thelia\Core\Event\Customer\CustomerEvent;
 use Thelia\Core\Event\TheliaEvents;
@@ -25,59 +28,80 @@ class CustomerBirthDateEventListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            TheliaEvents::FORM_AFTER_BUILD . '.thelia_customer_create' => ['addBirthDateInput', 128],
-            TheliaEvents::BEFORE_CREATECUSTOMER => ['getBirthDate', 128]
+            TheliaEvents::FORM_AFTER_BUILD . '.thelia_customer_create' => ['birthDateInput', 128],
+            TheliaEvents::AFTER_CREATECUSTOMER => ['createBirthDate', 128],
+
+            TheliaEvents::FORM_AFTER_BUILD . '.thelia_customer_profile_update' => ['birthDateInput', 128],
+            TheliaEvents::CUSTOMER_UPDATEPROFILE => ['updateBirthDate', 128],
+
+            TheliaEvents::FORM_AFTER_BUILD . '.thelia_customer_update' => ['birthDateInput', 128],
+            TheliaEvents::CUSTOMER_UPDATEACCOUNT => ['updateBirthDate', 128]
         ];
     }
 
-    /**
-     * Add birth date inputs to register form
-     * @param TheliaFormEvent $event
-     */
-    public function addBirthDateInput(TheliaFormEvent $event)
+    public function birthDateInput(TheliaFormEvent $event)
     {
-        $event->getForm()->getFormBuilder()
-        ->add(
-            'birth_year',
-            'choice',
-            [
-                'required' => true,
-                'choices' => range(date('Y', strtotime('now')), date('Y', strtotime('now'))-120)
-            ]
-        )
-        ->add(
-            'birth_month',
-            'choice',
-            [
-                'required' => true,
-                'choices' => [
-                    1 => 'January',
-                    2 => 'February',
-                    3 => 'March',
-                    4 => 'April',
-                    5 => 'May',
-                    6 => 'June',
-                    7 => 'July',
-                    8 => 'August',
-                    9 => 'September',
-                    10 => 'October',
-                    11 => 'November',
-                    12 => 'December'
-                ]
-            ]
-        )
-        ->add(
-            'birth_day',
-            'choice',
-            [
-                'required' => true,
-                'choices' => range(1, 31)
-            ]
-        );
+        if ($this->request->fromApi() === false) {
+            $event->getForm()->getFormBuilder()
+                ->add(
+                    'birth_date',
+                    'birthday',
+                    [
+                        'label' => 'Birth date',
+                        'required' => true,
+                        'widget' => 'choice',
+                        'format' => 'yyyy-MM-dd',
+                        'input' => 'string'
+                    ]
+                );
+        }
     }
 
-    public function getBirthDate(CustomerEvent $event)
+    public function createBirthDate(CustomerEvent $event)
     {
-        $birthDate = $this->request->get('thelia_customer_create')['birth_date'];
+        if($this->request->fromApi() === false) {
+            // Get date from input & format it
+            $birthDate = $this->request->get('thelia_customer_create')['birth_date'];
+            $birthDate = new \DateTime($birthDate['year'] . '-' . $birthDate['month'] . '-' . $birthDate['day']);
+
+            // Create a new birth date & save it
+            $this->doCreateBirthDate($event, $birthDate);
+        }
+    }
+
+    public function doCreateBirthDate(CustomerEvent $event, \DateTime $birthDate)
+    {
+        (new CustomerBirthDate())
+            ->setId($event->getCustomer()->getId())
+            ->setBirthDate($birthDate)
+            ->save();
+    }
+
+    public function updateBirthDate(CustomerEvent $event)
+    {
+        if($this->request->fromApi() === false) {
+            // Get date from input depending on request origin (front or back)
+            if ($this->request->fromFront() === true) {
+                $birthDate = $this->request->get('thelia_customer_profile_update')['birth_date'];
+            } elseif ($this->request->fromAdmin() === true) {
+                $birthDate = $this->request->get('thelia_customer_update')['birth_date'];
+            } else {
+                throw new Exception('No form found');
+            }
+
+            // Format birth date
+            $birthDate = new \DateTime($birthDate['year'] . '-' . $birthDate['month'] . '-' . $birthDate['day']);
+
+            // Check if the customer already have a birth date
+            if (null === $customerBirthDate = CustomerBirthDateQuery::create()->findOneById($event->getCustomer()->getId())) {
+                // Create a new birth date
+                $this->doCreateBirthDate($event, $birthDate);
+            } else {
+                // Save it
+                $customerBirthDate
+                    ->setBirthDate($birthDate)
+                    ->save();
+            }
+        }
     }
 }
