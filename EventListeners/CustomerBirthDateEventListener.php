@@ -20,7 +20,7 @@ class CustomerBirthDateEventListener implements EventSubscriberInterface
 {
     protected $request;
 
-    function __construct(Request $request)
+    public function __construct(Request $request)
     {
         $this->request = $request;
     }
@@ -39,9 +39,22 @@ class CustomerBirthDateEventListener implements EventSubscriberInterface
         ];
     }
 
+    /**
+     * Add birth date input in forms
+     * @param TheliaFormEvent $event
+     */
     public function birthDateInput(TheliaFormEvent $event)
     {
         if ($this->request->fromApi() === false) {
+            $data = $event->getForm()->getFormBuilder()->getData();
+
+            $customerBirthDate = null;
+
+            if (!empty($data['id'])) {
+                $customerBirthDate = CustomerBirthDateQuery::create()
+                    ->findOneById($data['id']);
+            }
+
             $event->getForm()->getFormBuilder()
                 ->add(
                     'birth_date',
@@ -51,15 +64,20 @@ class CustomerBirthDateEventListener implements EventSubscriberInterface
                         'required' => true,
                         'widget' => 'choice',
                         'format' => 'yyyy-MM-dd',
-                        'input' => 'string'
+                        'input' => 'string',
+                        'data' => ($customerBirthDate !== null) ? $customerBirthDate->getBirthDate('Y-m-d') : ''
                     ]
                 );
         }
     }
 
+    /**
+     * Get birth date from creation forms
+     * @param CustomerEvent $event
+     */
     public function createBirthDate(CustomerEvent $event)
     {
-        if($this->request->fromApi() === false) {
+        if ($this->request->fromApi() === false) {
             // Get date from input & format it
             $birthDate = $this->request->get('thelia_customer_create')['birth_date'];
             $birthDate = new \DateTime($birthDate['year'] . '-' . $birthDate['month'] . '-' . $birthDate['day']);
@@ -69,6 +87,13 @@ class CustomerBirthDateEventListener implements EventSubscriberInterface
         }
     }
 
+    /**
+     * Create a new Customer Birth Date
+     * @param CustomerEvent $event
+     * @param \DateTime $birthDate
+     * @throws \Exception
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
     public function doCreateBirthDate(CustomerEvent $event, \DateTime $birthDate)
     {
         (new CustomerBirthDate())
@@ -77,9 +102,15 @@ class CustomerBirthDateEventListener implements EventSubscriberInterface
             ->save();
     }
 
+    /**
+     * Update an existing birth date
+     * @param CustomerEvent $event
+     * @throws \Exception
+     * @throws \Propel\Runtime\Exception\PropelException
+     */
     public function updateBirthDate(CustomerEvent $event)
     {
-        if($this->request->fromApi() === false) {
+        if ($this->request->fromApi() === false) {
             // Get date from input depending on request origin (front or back)
             if ($this->request->fromFront() === true) {
                 $birthDate = $this->request->get('thelia_customer_profile_update')['birth_date'];

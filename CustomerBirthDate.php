@@ -12,14 +12,21 @@
 
 namespace CustomerBirthDate;
 
+use Propel\Runtime\Connection\ConnectionInterface;
+use Thelia\Install\Database;
 use Thelia\Module\BaseModule;
 
+/**
+ * Class CustomerBirthDate
+ * @package CustomerBirthDate
+ * @author Etienne Perriere - OpenStudio <eperriere@openstudio.fr>
+ */
 class CustomerBirthDate extends BaseModule
 {
-    /*
-     * You may now override BaseModuleInterface methods, such as:
-     * install, destroy, preActivation, postActivation, preDeactivation, postDeactivation
-     *
-     * Have fun !
-     */
+    public function postActivation(ConnectionInterface $con = null)
+    {
+        $database = new Database($con);
+
+        $database->insertSql(null, [__DIR__ . "/Config/create.sql", __DIR__ . "/Config/insert.sql"]);
+    }
 }

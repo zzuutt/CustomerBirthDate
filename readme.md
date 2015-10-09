@@ -1,12 +1,12 @@
 # CustomerBirthDate
 
-Add a short description here. You can also add a screenshot if needed.
+Add a date of birth input in customers' forms
 
 ## Installation
 
 ### Manually
 
-* Copy the module into ```<thelia_root>/local/modules/``` directory and be sure that the name of the module is [Put your module name here. ex : TheliaSmarty].
+* Copy the module into ```<thelia_root>/local/modules/``` directory and be sure that the name of the module is CustomerBirthDate.
 * Activate it in your thelia administration panel
 
 ### Composer
@@ -14,42 +14,13 @@ Add a short description here. You can also add a screenshot if needed.
 Add it in your main thelia composer.json file
 
 ```
-composer require thelia/[module-name]:~1.0
+composer require thelia/customer-birth-date-module:~1.0
 ```
 
 ## Usage
 
-Explain here how to use your module, how to configure it, etc.
-
-## Hook
-
-If your module use one or more hook, fill this part. Explain which hooks are used.
-
-
-## Loop
-
-If your module declare one or more loop, describe them here like this :
-
-[loop name]
-
-### Input arguments
-
-|Argument |Description |
-|---      |--- |
-|**arg1** | describe arg1 with an exemple. |
-|**arg2** | describe arg2 with an exemple. |
-
-### Output arguments
-
-|Variable   |Description |
-|---        |--- |
-|$VAR1    | describe $VAR1 variable |
-|$VAR2    | describe $VAR2 variable |
-
-### Exemple
-
-Add a complete exemple of your loop
-
-## Other ?
-
-If you have other think to put, feel free to complete your readme as you want.
+Once activated, inputs asking for customer's birth date appear:
+- in the register page
+- in the update account page
+- in the admin 'create customer' form
+- in the admin 'customer' page
