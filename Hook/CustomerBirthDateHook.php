@@ -15,7 +15,10 @@ class CustomerBirthDateHook extends BaseHook
     /* FRONT - CREATE */
     public function onRegister(HookRenderEvent $event)
     {
-        $event->add($this->render('register-birthdate-input.html'));
+        $event->add($this->render(
+            'customer-birthdate-input.html',
+            ['formName' => 'thelia.front.customer.create']
+        ));
     }
 
     public function onRegisterAddJs(HookRenderEvent $event)
@@ -26,7 +29,10 @@ class CustomerBirthDateHook extends BaseHook
     /* FRONT - UPDATE */
     public function onFrontUpdate(HookRenderEvent $event)
     {
-        $event->add($this->render('update-birthdate-input.html'));
+        $event->add($this->render(
+            'customer-birthdate-input.html',
+            ['formName' => 'thelia.front.customer.profile.update']
+        ));
     }
 
     public function onFrontUpdateAddJs(HookRenderEvent $event)
@@ -37,7 +43,10 @@ class CustomerBirthDateHook extends BaseHook
     /* BACK - CREATE */
     public function onBackCreate(HookRenderEvent $event)
     {
-        $event->add($this->render('create-customer-birthdate-input.html'));
+        $event->add($this->render(
+            'customer-birthdate-input.html',
+            ['formName' => 'thelia.admin.customer.create']
+        ));
     }
 
     public function onBackCreateAddJs(HookRenderEvent $event)
@@ -48,7 +57,10 @@ class CustomerBirthDateHook extends BaseHook
     /* BACK - UPDATE */
     public function onBackUpdate(HookRenderEvent $event)
     {
-        $event->add($this->render('update-customer-birthdate-input.html'));
+        $event->add($this->render(
+            'customer-birthdate-input.html',
+            ['formName' => 'thelia.admin.customer.update']
+        ));
     }
 
     public function onBackUpdateAddJs(HookRenderEvent $event)
