@@ -14,13 +14,36 @@ Add a date of birth input in customers' forms
 Add it in your main thelia composer.json file
 
 ```
-composer require thelia/customer-birth-date-module:~1.0
+composer require thelia/customer-birth-date-module:~1.1
 ```
 
 ## Usage
 
 Once activated, inputs asking for customer's birth date appear:
-- in the register page
-- in the update account page
+- in the customer register page
+- in the customer update account page
 - in the admin 'create customer' form
 - in the admin 'customer' page
+
+## Loop
+
+customerbirthdate
+
+### Input arguments
+
+|Argument |Description |
+|---      |---         |
+|**id**   | The customer id you want to diplay the date of birth |
+
+### Output arguments
+
+|Variable       |Description |
+|---            |---         |
+|$CUSTOMER_ID   | The ID of the customer |
+|$BIRTHDATE     | The date of birth of the customer. Format: *yyyy-mm-dd* |
+
+### Exemple
+
+{loop type="customerbirthdate" name="birth_date"}
+    <p>Customer ID: {$CUSTOMER_ID} | Date of birth : {$BIRTHDATE}</p>
+{/loop}

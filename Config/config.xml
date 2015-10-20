@@ -23,4 +23,9 @@
             <tag name="hook.event_listener" event="customer.edit-js" type="back" method="onBackUpdateAddJs" />
         </hook>
     </hooks>
+
+    <loops>
+        <loop name="customerbirthdate" class="CustomerBirthDate\Loop\CustomerBirthDateLoop" />
+    </loops>
+
 </config>
