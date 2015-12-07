@@ -64,6 +64,7 @@ class CustomerBirthDateEventListener implements EventSubscriberInterface
                         'required' => true,
                         'widget' => 'choice',
                         'format' => 'yyyy-MM-dd',
+                        'years' => range(date('Y')-90, date('Y')),
                         'input' => 'string',
                         'data' => ($customerBirthDate !== null) ? $customerBirthDate->getBirthDate('Y-m-d') : ''
                     ]
