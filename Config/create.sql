@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `customer_birth_date`
     `id` INTEGER NOT NULL,
     `birth_date` DATE NOT NULL,
     PRIMARY KEY (`id`),
-    CONSTRAINT `fk_customer_id`
+    CONSTRAINT `fk_customer_birthdate_id`
         FOREIGN KEY (`id`)
         REFERENCES `customer` (`id`)
         ON UPDATE CASCADE
